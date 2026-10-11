@@ -1,4 +1,14 @@
 crewai
 crewai[tools]
-pydantic
+openai
 python-dotenv
+langchain 
+openai
+langchain-community
+langchain-core
+langchain-openai
+streamlit
+torch 
+pydantic
+langchain-tavily
+

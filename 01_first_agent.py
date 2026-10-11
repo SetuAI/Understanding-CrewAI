@@ -1,42 +1,33 @@
-'''
-Writer Agent --> access website search tool --> access some information --> blog post
-
-'''
-
 import os
 from dotenv import load_dotenv
 load_dotenv(override=True)
 
-from crewai import Agent, Task, Crew
-from crewai_tools import WebsiteSearchTool
+from crewai import Agent, Task ,Crew
 
-# create the tool object
-search_tool = WebsiteSearchTool()
 
-# define the agent
+# define the writer agent
 writer_agent = Agent(
-    role = "Blog writer agent",
-    goal = "Write short clear blog posts for social media based on the latest information from the web.",
-    backstory = "You can explain complex topics with ease and simple analogies",
-    llm = "gpt-4o",
-    tools = [search_tool] # agent is using search tool to perform its task
+    role = "Blog writer",
+    goal = "Write short , clear blog posts for beginners",
+    backstory = "You explain complex technical topics in simple terms \
+        with interesting analogies",
+    llm = "gpt-4o"
 )
 
-# assigning the task to the agent
+# define the task , that I will be giving to the agent
 write_task = Task(
-    description ="Write a 350 word post about the {topic}",
-    expected_output ="A blog post for LinkedIn , with clickable title , 4 paragraphs",
-    agent = writer_agent # assigning the agent to the task
+    description = "Write a 150 word blog post about the {topic}.", 
+    expected_output="A blog post with a title, and 4 short paragraphs, this is for social media",
+    agent = writer_agent
 )
 
-# assembling the crew with the agent and the task
+# define the crew , that will manage the task
 crew = Crew(
     agents = [writer_agent],
     tasks = [write_task],
     verbose = True
 )
 
-# execute 
-result = crew.kickoff(inputs= {"topic" : "Recent launches by NVIDIA in GPU as of 2026  "})
+result = crew.kickoff(inputs = {"topic": "importance of AI in education"})
 
 print(result)

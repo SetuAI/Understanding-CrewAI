@@ -1,51 +1,62 @@
+'''
+2 agents : 
+1 searches the website 
+2 agent writes a blog
+'''
+
 import os
 from dotenv import load_dotenv
 load_dotenv(override=True)
-
-from crewai import Agent, Task, Crew,Process
+from crewai import Agent, Task ,Crew, Process
 from crewai_tools import WebsiteSearchTool
 
-WEBSITE = "https://www.oracle.com/in/news/"
+WEBSITE = "https://docs.crewai.com/v1.15.23/en/concepts/tools"
 
-# create the tool object
-search_tool = WebsiteSearchTool(website=WEBSITE)
+search_tool = WebsiteSearchTool(website = WEBSITE)
 
-# define researcher agent
+
+# define the researcher agent
 
 researcher_agent = Agent(
-    role = "Website Researcher agent",
-    goal ="Search the website for relevant information on a {topic} from the given website.",
-    backstory ="You only report facts that you find on the website. You do not make up information.",
-    tools = [search_tool],
-    llm = "gpt-4o"
-)
-
-# define writer agent
-writer_agent = Agent(
-    role = "Blog writer agent",
-    goal = "Write short clear blog posts for social media based on the latest information from the web.",
-    backstory = "You can explain complex topics with ease and simple analogies.\
-        You write short and engaging blog posts for social media. You write in a clear and concise manner.",
+    role = "Website researcher",
+    goal = "Search the website for relevant information about the {topic} from the given website",
+    backstory = "You only report what you find on the website, and you do not make up any information",
+    tools = [search_tool], # researcher agent has access to the search tool
     llm = "gpt-4o",
 )
 
-# define tasks for researcher agent
-research_task = Task(
-    description="Search the website for relevant information on {topic} from the website.",
-    expected_output = "5-7 bullet points of relevant information from the website.",
-    agent = researcher_agent
+
+# defining the writer agent
+writer_agent = Agent(
+    role ="Blog writer",
+    goal = "Turn the research notes into a clear blog post for beginners",
+    backstory = "You write short , clear blog posts for beginners, and you explain complex \
+        technical topics in simple terms with interesting analogies",
+    llm = "gpt-4o",
+
 )
+
+# define the research task 
+
+research_task = Task(
+    description = "Search the website for relevant information about the {topic} from the given website", 
+    expected_output = "5-7 bullet points on the facts found on the website about the topic",
+    agent = researcher_agent,
+)
+
 
 # define the write task
 
 write_task = Task(
-    description="Write a 350 word post about the {topic} based on the information provided by the researcher agent.",
-    expected_output="A 350 word blog post about the {topic}.",
-    agent=writer_agent,
+    description = "Write a 300 word blog post about the {topic} based on the research notes",
+    expected_output ="A blog post in markdown with title, introduction, 3-4 short paragraphs, and a conclusion, this is for social media",
+    agent = writer_agent,
     context = [research_task],
     output_file = "blog_post.md"
 )
-# assembling the crew with the agents and tasks
+
+# assemble the crew
+
 crew = Crew(
     agents = [researcher_agent, writer_agent],
     tasks = [research_task, write_task],
@@ -53,7 +64,6 @@ crew = Crew(
     verbose = True
 )
 
-# execute the crew
-result = crew.kickoff(inputs = {"topic":"extract news with respect to NTT Docomo"})
+result = crew.kickoff(inputs = {"topic": "tools in Crew AI"})
 
 print(result)
